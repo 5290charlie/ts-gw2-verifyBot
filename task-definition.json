@@ -1,0 +1,72 @@
+{
+    "taskDefinition": {
+        "status": "ACTIVE", 
+        "networkMode": "bridge", 
+        "family": "ts3-server", 
+        "placementConstraints": [], 
+        "requiresAttributes": [
+            {
+                "name": "com.amazonaws.ecs.capability.logging-driver.awslogs"
+            }, 
+            {
+                "name": "com.amazonaws.ecs.capability.docker-remote-api.1.19"
+            }
+        ], 
+        "volumes": [
+            {
+                "host": {
+                    "sourcePath": "/efs.old/ts3"
+                }, 
+                "name": "ts3-data"
+            }
+        ], 
+        "taskDefinitionArn": "arn:aws:ecs:us-east-1:968666697601:task-definition/ts3-server:4", 
+        "containerDefinitions": [
+            {
+                "environment": [], 
+                "name": "ts3", 
+                "mountPoints": [
+                    {
+                        "sourceVolume": "ts3-data", 
+                        "containerPath": "/data"
+                    }
+                ], 
+                "image": "mbentley/teamspeak", 
+                "cpu": 1024, 
+                "portMappings": [
+                    {
+                        "protocol": "udp", 
+                        "containerPort": 9987, 
+                        "hostPort": 9987
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 30033, 
+                        "hostPort": 30033
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 10011, 
+                        "hostPort": 10011
+                    }, 
+                    {
+                        "protocol": "tcp", 
+                        "containerPort": 41144, 
+                        "hostPort": 41144
+                    }
+                ], 
+                "logConfiguration": {
+                    "logDriver": "awslogs", 
+                    "options": {
+                        "awslogs-group": "ts3", 
+                        "awslogs-region": "us-east-1"
+                    }
+                }, 
+                "memory": 995, 
+                "essential": true, 
+                "volumesFrom": []
+            }
+        ], 
+        "revision": 4
+    }
+}

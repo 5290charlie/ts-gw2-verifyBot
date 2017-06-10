@@ -298,26 +298,31 @@ def my_event_handler(sender, event):
                                 if BOT.clientNeedsVerify(rec_from_uid):
                                     TS3Auth.log("Received verify response from %s" %rec_from_name)
                                     auth=TS3Auth.auth_request(uapi,uname)
+                                    TS3Auth.log(auth.user_msgs)
                                     if DEBUG:
-                                            TS3Auth.log('Name: |%s| API: |%s|' %(uname,uapi))
+                                        TS3Auth.log('Name: |%s| API: |%s|' %(uname,uapi))
                                     if auth.success:
-                                            TS3Auth.log("Setting permissions for %s as verified." %rec_from_name)
+                                        TS3Auth.log("Setting permissions for %s as verified." %rec_from_name)
 
-                                            #set permissions
-                                            BOT.setPermissions(rec_from_uid)
+                                        #set permissions
+                                        BOT.setPermissions(rec_from_uid)
 
-                                            #get todays date
-                                            today_date=datetime.date.today()
+                                        #get todays date
+                                        today_date=datetime.date.today()
 
-                                            #Add user to database so we can query their API key over time to ensure they are still on our server
-                                            BOT.addUserToDB(rec_from_uid,uname,uapi,today_date,today_date)
-                                            print ("Added user to DB with ID %s" %rec_from_uid)
+                                        #Add user to database so we can query their API key over time to ensure they are still on our server
+                                        BOT.addUserToDB(rec_from_uid,uname,uapi,today_date,today_date)
+                                        print ("Added user to DB with ID %s" %rec_from_uid)
 
-                                            #notify user they are verified
-                                            sender.sendtextmessage( targetmode=1, target=rec_from_id, msg=bot_msg_success)
+                                        #notify user they are verified
+                                        sender.sendtextmessage( targetmode=1, target=rec_from_id, msg=bot_msg_success)
                                     else:
-                                            #Auth Failed
-                                            sender.sendtextmessage( targetmode=1, target=rec_from_id, msg=bot_msg_fail)
+                                        #Auth Failed
+                                        if len(auth.user_msgs) > 0:
+                                                for msg in auth.user_msgs:
+                                                        sender.sendtextmessage( targetmode=1, target=rec_from_id, msg=msg)
+                                        else:
+                                                sender.sendtextmessage( targetmode=1, target=rec_from_id, msg=bot_msg_fail)
                                 else:
                                         TS3Auth.log("Received API Auth from %s, but %s is already verified. Notified user as such." %(rec_from_name,rec_from_name))
                                         sender.sendtextmessage( targetmode=1, target=rec_from_id, msg=bot_msg_alrdy_verified)

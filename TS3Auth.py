@@ -38,6 +38,7 @@ class auth_request:
     def __init__(self,api_key,user_id=''): #User ID left at None for queries that don't require authentication. If left at None the 'success' will always fail due to self.authCheck().
         self.key = api_key
         self.user = user_id
+        self.user_msgs = []
         self.success = False # Used to verify if user is on our server
         self.char_check = False # Used to verify is any character is at least 80
         self.required_level=int(required_level)
@@ -66,7 +67,8 @@ class auth_request:
             log("%s %s Account loaded for %s" %(h_hdr,h_acct,self.user))
             self.authCheck()
 
-        except:
+        except Exception as inst:
+            log(inst)
             log('%s %s Possibly bad API Key. Error obtaining account details for %s. (Does the API key allow "account" queries?)' %(h_hdr,h_acct,self.user))
 
 
@@ -107,18 +109,25 @@ class auth_request:
         log("%s %s Running auth check for %s" %(h_hdr,h_auth,self.name))
 
         #Check if account name given is correct AND if they are on the required server
-        if self.user == self.name and self.users_server in required_servers:
-
-            #Check if player has met character requirements
-            if self.char_check:
-                self.success = True
-                log("%s %s Auth Success for user %s." %(h_hdr,h_auth,self.user))
-
-            else:
-                log("%s %s User %s is on the correct server but does not have any level %s characters." %(h_hdr,h_auth,self.user,self.users_server))
-
+        if self.user != self.name:
+            log('bad user')
+            self.user_msgs.append("%s does not match the Account Name for the provided API Key." % (self.user))
+        elif not self.users_server in required_servers:
+            log('bad server')
+            self.user_msgs.append("Automatic verification is not enabled for %s players." % (self.users_server))
+        elif not self.char_check:
+            log('failed char check')
+            self.user_msgs.append("Automatic verification requires at least 1 level %s character." % (self.required_level))
+            log("%s %s User %s is on the correct server but does not have any level %s characters." %(h_hdr,h_auth,self.user,self.users_server))
         else:
+            self.success = True
+            log("%s %s Auth Success for user %s." %(h_hdr,h_auth,self.user))
+
+        if not self.success:
             log("%s %s Authentication Failed with:\n\n    User Gave:\n        ~USER ID: %s\n          ~Server: %s\n\n     Expected:\n         ~USER ID: %s\n          ~Server: %s\n\n" %(h_hdr,h_auth,self.user,self.users_server,self.name,self.required_servers))
+
+        log(self.user_msgs)
+
         return self.success
 
     def charCheck(self):

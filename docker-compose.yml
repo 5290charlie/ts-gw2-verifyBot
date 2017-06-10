@@ -1,0 +1,13 @@
+version: '2'
+
+services:
+  ts3:
+    image: mbentley/teamspeak
+    volumes:
+      - /data/ts3:/data
+    ports:
+      - 9987:9987/udp
+      - 30033:30033
+      - 41144:41144
+  bot:
+    build: .
